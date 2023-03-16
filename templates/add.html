@@ -1,0 +1,63 @@
+{% load static  %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/loginform.css' %}">
+</head>
+<body>
+    
+    <form action="/add/" method="post" class="loginform">
+        {% csrf_token %}
+
+        <!-- email -->
+        <div class="loginform__item">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email">
+        </div>
+
+        <!-- password -->
+        <div class="loginform__item">
+            <label for="password">Пароль</label>
+            <input type="password" name="password" id="password">
+        </div>
+
+        <!-- smtp host -->
+        <div class="loginform__item">
+            <label for="smtp_host">SMTP хост</label>
+            <input type="smtp_host" name="smtp_host" id="smtp_host">
+        </div>
+
+        <!-- smtp port -->
+        <div class="loginform__item">
+            <label for="smtp_port">SMTP порт</label>
+            <input type="smtp_port" name="smtp_port" id="smtp_port">
+        </div>
+
+        <!-- imap host -->
+        <div class="loginform__item">
+            <label for="imap_host">IMAP хост</label>
+            <input type="imap_host" name="imap_host" id="imap_host">
+        </div>
+
+        <!-- imap port -->
+        <div class="loginform__item">
+            <label for="imap_port">IMAP порт</label>
+            <input type="imap_port" name="imap_port" id="imap_port">
+        </div>
+
+        <div class="loginform__item">
+            <button type="submit" class="loginform__submit">
+                Добавить
+            </button>
+        </div>
+
+
+    </form>
+
+</body>
+</html>
