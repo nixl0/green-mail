@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "green-mail"
+version = "0.1.0"
+description = ""
+authors = ["nixl <nilixen@yandex.ru>"]
+readme = "README.md"
+packages = [{include = "green_mail"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^4.1.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
