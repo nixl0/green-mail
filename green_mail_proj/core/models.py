@@ -6,10 +6,10 @@ class Account(models.Model):
     password = models.CharField(max_length=200) # TODO temporary solution
     imap_host = models.CharField(max_length=100)
     imap_port = models.CharField(max_length=5)
-    smtp_host = models.CharField(max_length=100)
-    smtp_host = models.CharField(max_length=5)
-    pop3_host = models.CharField(max_length=100)
-    pop3_host = models.CharField(max_length=5)
+    smtp_host = models.CharField(max_length=100, null=True)
+    smtp_port = models.CharField(max_length=5, null=True)
+    pop3_host = models.CharField(max_length=100, null=True)
+    pop3_host = models.CharField(max_length=5, null=True)
 
 
 class Email(models.Model):

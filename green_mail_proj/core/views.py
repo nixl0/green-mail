@@ -4,14 +4,16 @@ import smtplib
 import imaplib
 import email as em
 import base64
-
+from core.models import Email, Account
+from django.db import connection
+from dateutil import parser
 
 
 def home(request):
     if request.method == 'GET':
         return render(request, 'home.html')
     elif request.method == 'POST':
-        email = request.POST.get('email')
+        email_address = request.POST.get('email')
         password = request.POST.get('password')
         smtp_host = request.POST.get('smtp_host')
         smtp_port = request.POST.get('smtp_port')
@@ -19,20 +21,46 @@ def home(request):
         imap_port = request.POST.get('imap_port')
 
         # signing in
-        messages_list = load_imap_messages(email, password, imap_host, imap_port)
+        messages_list = load_imap_messages(email_address, password, imap_host, imap_port)
+
+        # saving account credentials
+        # deletes the contents of the Account table and restarts the index sequence
+        Account.objects.all().delete()
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM sqlite_sequence WHERE name="core_account"')
+        # adds account
+        account = Account(
+            email=email_address,
+            password=password,
+            imap_host=imap_host,
+            imap_port=imap_port,
+            smtp_host=smtp_host,
+            smtp_port=smtp_port
+        )
+
 
         # loading messages into our local db cache
-        # TODO
+        # deletes the contents of the Email table and restarts the index sequence
+        Email.objects.all().delete()
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM sqlite_sequence WHERE name="core_email"')
+        # does the loading itself
+        for message in messages_list:
+            email = Email(
+                sender_email=message['from'],
+                recipients_email=message['to'],
+                subject=message['subject'],
+                body=message['body'],
+                date_sent=parser.parse(message['date']).strftime('%Y-%m-%d %H:%M:%S')
+            )
 
-        # string = ''
-        # for dic in messages_list:
-        #     string = string + str(dic['num']) + '<br>'
-        #     for key, value in dic:
-        #         string = string + f'{str(key)}: {str(value)}' + '<br>'
-            
-        #     string = string + '<hr>'
+            email.save()
 
-        return HttpResponse(messages_list)
+        return render(request, 'home.html', {
+            'messages': messages_list,
+            'email_address': email_address
+        })
+
 
 def authenticate(request):
     return render(request, 'authentication.html')
@@ -83,7 +111,8 @@ def load_imap_messages(email, password, imap_host, imap_port=993):
             if part.get_content_type() == 'text/plain':
                 message_body = part.get_payload()
             elif part.get_content_type() == 'text/html':
-                message_body = 'HTML'
+                # message_body = 'HTML'
+                message_body = part.get_payload(decode=True).decode()
 
         parsed_message_fields['body'] = message_body
 
@@ -106,3 +135,10 @@ def decode_base64(encoded_str):
         decoded_str = encoded_str
 
     return decoded_str
+
+
+def show(request, num):
+    email = Email.objects.get(id=num)
+    return render(request, 'message.html', {
+        'message': email
+    })

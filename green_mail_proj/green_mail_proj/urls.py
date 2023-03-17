@@ -22,6 +22,7 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', views.authenticate),
+    path('email/<int:num>', views.show),
     path('', views.home),
     path('__debug__/', include('debug_toolbar.urls'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

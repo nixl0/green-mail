@@ -31,14 +31,14 @@
 
                 <div class="account__category__first">
                     <p class="category__first__item account__email">
-                        {{ email }}
+                        {{ email_address }}
                     </p>
-                    <a href="/<email>/remove" class="category__first__item">
+                    <a href="/deauth" class="category__first__item">
                         <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 12H20" stroke="#FFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </a>
-                    <a href="/<email>/edit" class="category__first__item">
+                    <a href="/" class="category__first__item">
                         <svg version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             width="20px" height="20px" viewBox="0 0 512 512" xml:space="preserve">
                             <g>
@@ -65,22 +65,22 @@
         </div>
 
         <div class="block inbox">
-        {% if emails %}
-            {% for email in emails %}
+        {% if messages %}
+            {% for message in messages %}
             
                 
-                <a href="/email/{{ email }}" class="email link-fill">
-                    <p class="email__value" title="{{ email.num }}">
-                        {{ email.num }}
+                <a href="/email/{{ message.num }}" class="email link-fill">
+                    <p class="email__value" title="{{ message.num }}">
+                        {{ message.num }}
                     </p>
-                    <p class="email__value" title="{{ email.from }}">
-                        {{ email.from }}
+                    <p class="email__value" title="{{ message.from }}">
+                        {{ message.from }}
                     </p>
-                    <p class="email__value" title="{{ email.subject }}">
-                        {{ email.subject }}
+                    <p class="email__value" title="{{ message.subject }}">
+                        {{ message.subject }}
                     </p>
-                    <p class="email__value" title="{{ email.date }}">
-                        {{ email.date }}
+                    <p class="email__value" title="{{ message.date }}">
+                        {{ message.date }}
                     </p>
                 </a>
                 
