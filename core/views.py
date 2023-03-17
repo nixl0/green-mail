@@ -4,12 +4,16 @@ import smtplib
 import imaplib
 import email as em
 
-def home(request):
-    return render(request, 'home.html');
 
-def add(request):
+'''
+    Home page
+    Initially thru GET shows no mail accounts, but once the user signs into one, loads the messages
+'''
+def home(request):
     if request.method == 'GET':
-        return render(request, 'add.html')
+        
+        return render(request, 'home.html');
+
     elif request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -20,8 +24,22 @@ def add(request):
 
         email_list = login(email, password, imap_host, imap_port)
 
-        return HttpResponse(f'{email_list}')
-    
+        return render(request, 'home.html', {
+            'email': email,
+            'emails': email_list
+        })
+
+
+'''
+    Authentication page
+'''
+def add(request):
+    return render(request, 'add.html')
+
+
+'''
+    Logic to sign in and load mail
+'''
 def login(email, password, imap_host, imap_port = 993):
     mail = imaplib.IMAP4_SSL(imap_host, imap_port)
     mail.login(email, password)
@@ -32,24 +50,11 @@ def login(email, password, imap_host, imap_port = 993):
     email_list = []
     for num in data[0].split():
         _, data = mail.fetch(num, '(RFC822)')
-        # email_list.append(data[0][1])
 
-        # Parse the email message into a Message object
         email_message = em.message_from_bytes(data[0][1])
-        # Extract the email message body as a string
-
-        # email_body = ""
-        # if email_message.is_multipart():
-        #     for payload in email_message.get_payload():
-        #         if payload.get_content_type == 'text/html':
-        #             email_body += payload.get_payload(decode=True).decode()
-        # else:
-        #     email_body = email_message.get_payload(decode=True).decode()
-
-        # email_list.append(email_body)
 
         email_data = {
-            'num': num,
+            'num': num.decode(),
             'from': email_message.get('From'),
             'to': email_message.get('To'),
             'bcc': email_message.get('BCC'),
@@ -61,13 +66,18 @@ def login(email, password, imap_host, imap_port = 993):
             if part.get_content_type() == 'text/plain':
                 email_data['content'] = part.as_string()
             elif part.get_content_type() == 'text/html':
+                # try:
+                #     html_content = part.get_payload(decode=True).decode('utf-8')
+
+                #     try:
+                #         html_content = part.get_payload(decode=True).decode('iso-8859-1')
+                #     except UnicodeDecodeError:
+                #         raise
+                # except UnicodeDecodeError:
+                #     html_content = 'Failed to decode HTML content'
+
                 try:
-                    html_content = part.get_payload(decode=True).decode()
-                    
-                    try:
-                        html_content = part.get_payload(decode=True).decode('iso-8859-1')
-                    except UnicodeDecodeError:
-                        raise
+                    html_content = part.get_payload(decode=True).decode('iso-8859-1')
                 except UnicodeDecodeError:
                     html_content = 'Failed to decode HTML content'
 
@@ -78,3 +88,7 @@ def login(email, password, imap_host, imap_port = 993):
     mail.close()
 
     return email_list
+
+
+def view_message(request):
+    pass

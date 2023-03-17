@@ -22,5 +22,6 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('add/', views.add),
+    path('email/<str:num>', views.view_message, ),
     path('', views.home),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

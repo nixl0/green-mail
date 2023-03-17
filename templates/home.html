@@ -31,7 +31,7 @@
 
                 <div class="account__category__first">
                     <p class="category__first__item account__email">
-                        email1@email.com
+                        {{ email }}
                     </p>
                     <a href="/<email>/remove" class="category__first__item">
                         <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -64,52 +64,29 @@
             </div>
         </div>
 
-
         <div class="block inbox">
-            <a href="google.com" class="email link-fill">
-                <p class="email__value">
-                    1
-                </p>
-                <p class="email__value">
-                    Ded Pikhto
-                </p>
-                <p class="email__value">
-                    Kudykina gora
-                </p>
-                <p class="email__value">
-                    2022-03-29
-                </p>
-            </a>
+        {% if emails %}
+            {% for email in emails %}
             
-            <a href="google.com" class="email link-fill">
-                <p class="email__value">
-                    1
-                </p>
-                <p class="email__value">
-                    Ded Pikhto
-                </p>
-                <p class="email__value">
-                    Kudykina gora
-                </p>
-                <p class="email__value">
-                    2022-03-29
-                </p>
-            </a>
-            <a href="google.com" class="email link-fill">
-                <p class="email__value">
-                    1
-                </p>
-                <p class="email__value">
-                    Ded Pikhto
-                </p>
-                <p class="email__value">
-                    Kudykina gora
-                </p>
-                <p class="email__value">
-                    2022-03-29
-                </p>
-            </a>
-
+                
+                <a href="/email/{{ email }}" class="email link-fill">
+                    <p class="email__value" title="{{ email.num }}">
+                        {{ email.num }}
+                    </p>
+                    <p class="email__value" title="{{ email.from }}">
+                        {{ email.from }}
+                    </p>
+                    <p class="email__value" title="{{ email.subject }}">
+                        {{ email.subject }}
+                    </p>
+                    <p class="email__value" title="{{ email.date }}">
+                        {{ email.date }}
+                    </p>
+                </a>
+                
+                    
+            {% endfor %}
+        {% endif %}
         </div>
     </div>
 </body>

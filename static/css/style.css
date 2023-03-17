@@ -2,119 +2,126 @@
 @import url('darkcolors.css');
 
 body {
-  background-color: var(--second-color);
-  color: var(--first-color);
+    background-color: var(--second-color);
+    color: var(--first-color);
 }
 
 a {
-  color: var(--first-color);
+    color: var(--first-color);
 }
 
 .svg-fill {
-  color: var(--first-color);
+    color: var(--first-color);
 }
 
 .link-fill {
-  transition-duration: 200ms;
+    transition-duration: 200ms;
 }
 
 .link-fill:hover {
-  background-color: var(--first-accent-color);
-  cursor: pointer;
+    background-color: var(--first-accent-color);
+    cursor: pointer;
 }
 
 .link-text {
-  transition-duration: 200ms;
+    transition-duration: 200ms;
 }
 
 .link-text:hover {
-  color: var(--first-accent-color);
+    color: var(--first-accent-color);
 }
 
 /* Add a black background color to the top navigation bar */
 .topnav {
-  overflow: hidden;
-  background-color: var(--third-color);
+    overflow: hidden;
+    background-color: var(--third-color);
 }
 
 /* Style the search box inside the navigation bar */
 .topnav input[type=text] {
-  padding: 12px;
-  border: none;
-  font-size: 18px;
-  background-color: var(--fourth-color);
-  color: var(--first-color);
+    padding: 12px;
+    border: none;
+    font-size: 18px;
+    background-color: var(--fourth-color);
+    color: var(--first-color);
 }
 
 .content {
-  display: flex;
-  margin: 10px;
+    display: flex;
+    margin: 10px;
 }
 
 .block {
-  background-color: var(--third-color);
-  color: var(--fifth-color);
-  padding: 10px;
-  border-radius: 20px;
+    background-color: var(--third-color);
+    color: var(--fifth-color);
+    padding: 10px;
+    border-radius: 20px;
 }
 
 .accounts {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-right: 10px;
 }
 
 .account {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  background-color: var(--fourth-color);
-  padding: 18px;
-  flex-direction: column;
-  border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--fourth-color);
+    padding: 18px;
+    flex-direction: column;
+    border-radius: 20px;
 }
 
 .account__category {
-  color: var(--fifth-color);
+    color: var(--fifth-color);
 }
 
 .account__category__first {
-  color: var(--fifth-color);
-  display: flex;
-  gap: 6px;
+    color: var(--fifth-color);
+    display: flex;
+    gap: 6px;
 }
 
 .category__first__item {
-  padding: 4px;
+    padding: 4px;
 }
 
 .category__first__item svg {
-  transition-duration: 200ms;
+    transition-duration: 200ms;
 }
 
 .category__first__item svg:hover {
-  transition-duration: 200ms;
-  color: var(--first-accent-color);
+    transition-duration: 200ms;
+    color: var(--first-accent-color);
 }
 
 .account__email {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .inbox {
-  display: flex;
-  flex-grow: 3;
-  flex-direction: column;
-  gap: 10px;
+    display: flex;
+    flex-grow: 3;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .email {
-  display: flex;
-  justify-content: space-between;
-  background-color: var(--fourth-color);
-  gap: 40px;
-  padding: 18px;
-  border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--fourth-color);
+    gap: 40px;
+    padding: 18px;
+    border-radius: 20px;
+}
+
+.email__value {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
