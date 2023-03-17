@@ -1,19 +1,15 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import smtplib
 import imaplib
 import email as em
+import base64
 
 
-'''
-    Home page
-    Initially thru GET shows no mail accounts, but once the user signs into one, loads the messages
-'''
+
 def home(request):
     if request.method == 'GET':
-        
-        return render(request, 'home.html');
-
+        return render(request, 'home.html')
     elif request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -22,73 +18,91 @@ def home(request):
         imap_host = request.POST.get('imap_host')
         imap_port = request.POST.get('imap_port')
 
-        email_list = login(email, password, imap_host, imap_port)
+        # signing in
+        messages_list = load_imap_messages(email, password, imap_host, imap_port)
 
-        return render(request, 'home.html', {
-            'email': email,
-            'emails': email_list
-        })
+        # loading messages into our local db cache
+        # TODO
+
+        # string = ''
+        # for dic in messages_list:
+        #     string = string + str(dic['num']) + '<br>'
+        #     for key, value in dic:
+        #         string = string + f'{str(key)}: {str(value)}' + '<br>'
+            
+        #     string = string + '<hr>'
+
+        return HttpResponse(messages_list)
+
+def authenticate(request):
+    return render(request, 'authentication.html')
 
 
-'''
-    Authentication page
-'''
-def add(request):
-    return render(request, 'add.html')
-
-
-'''
-    Logic to sign in and load mail
-'''
-def login(email, password, imap_host, imap_port = 993):
+def load_imap_messages(email, password, imap_host, imap_port=993):
+    # log in to the imap server
     mail = imaplib.IMAP4_SSL(imap_host, imap_port)
     mail.login(email, password)
-    mail.select('inbox')
 
+    # select inbox and load all messages
+    mail.select('inbox')
     _, data = mail.search(None, 'ALL')
 
-    email_list = []
+    # parse messages
+    messages_list = []
     for num in data[0].split():
         _, data = mail.fetch(num, '(RFC822)')
+        # raw_message = em.message_from_bytes(data[0][1])
+        # message = em.message_from_bytes(raw_message)
 
-        email_message = em.message_from_bytes(data[0][1])
+        raw_message = data[0][1].decode('utf-8')
+        message = em.message_from_string(raw_message)
 
-        email_data = {
+        # decode
+        parsed_message_fields = {
             'num': num.decode(),
-            'from': email_message.get('From'),
-            'to': email_message.get('To'),
-            'bcc': email_message.get('BCC'),
-            'date': email_message.get('Date'),
-            'subject': email_message.get('Subject')
+            'from': decode_base64(message['From']),
+            'to': decode_base64(message['Subject']),
+            'bcc': message['Bcc'],
+            'date': message['Date'],
+            'subject': decode_base64(message['Subject']),
         }
 
-        for part in email_message.walk():
+        message_body = ''
+
+        # if raw_message.is_multipart():
+        #     for payload in raw_message.get_payload():
+        #         if payload.get_content_type() == 'text/html':
+        #             try:
+        #                 message_body += payload.get_payload(decode=True).decode()
+        #             except UnicodeDecodeError:
+        #                 message_body = 'Failed to decode HTML content'
+        #         else:
+        #             message_body = raw_message.get_payload()
+
+        for part in message.walk():
             if part.get_content_type() == 'text/plain':
-                email_data['content'] = part.as_string()
+                message_body = part.get_payload()
             elif part.get_content_type() == 'text/html':
-                # try:
-                #     html_content = part.get_payload(decode=True).decode('utf-8')
+                message_body = 'HTML'
 
-                #     try:
-                #         html_content = part.get_payload(decode=True).decode('iso-8859-1')
-                #     except UnicodeDecodeError:
-                #         raise
-                # except UnicodeDecodeError:
-                #     html_content = 'Failed to decode HTML content'
+        parsed_message_fields['body'] = message_body
 
-                try:
-                    html_content = part.get_payload(decode=True).decode('iso-8859-1')
-                except UnicodeDecodeError:
-                    html_content = 'Failed to decode HTML content'
-
-            email_data['html_content'] = html_content
-
-        email_list.append(email_data)
+        messages_list.append(parsed_message_fields)
 
     mail.close()
 
-    return email_list
+    return messages_list
 
 
-def view_message(request):
-    pass
+def decode_base64(encoded_str):
+    decoded_str = ''
+    if "=?utf-8?b?" in encoded_str:
+        encoded_str_parts = encoded_str.split("=?utf-8?b?")
+        for part in encoded_str_parts:
+            if part:
+                decoded_part = base64.b64decode(part)
+                decoded_str += decoded_part.decode('utf-8')
+    else:
+        decoded_str = encoded_str
+
+    return decoded_str
