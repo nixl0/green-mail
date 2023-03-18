@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/formstyle.css' %}">
+</head>
+<body>
+    
+    <form action="/send/" method="post" class="form">
+        {% csrf_token %}
+
+        <div class="form__item">
+            <label for="recipient">Получатель</label>
+            <input type="text" name="recipient" id="recipient">
+        </div>
+
+        <div class="form__item">
+            <label for="subject">Тема</label>
+            <input type="text" name="subject" id="subject">
+        </div>
+
+        <div class="form__item">
+            <label for="body">Тело письма</label>
+            <textarea name="body" name="body" id="body" cols="60" rows="20"></textarea>
+        </div>
+
+        <div class="form__item">
+            <button type="submit" class="form__submit">
+                Отправить
+            </button>
+        </div>
+
+
+    </form>
+
+</body>
+</html>

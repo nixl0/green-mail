@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', views.authenticate),
     path('email/<int:num>', views.show),
+    path('compose/', views.compose),
+    path('send/', views.send),
     path('', views.home),
     path('__debug__/', include('debug_toolbar.urls'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

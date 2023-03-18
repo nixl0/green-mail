@@ -1,6 +1,6 @@
 @import url('darkcolors.css');
 
-.loginform {
+.form {
     margin-top: 100px;
     display: flex;
     flex-direction: column;
@@ -9,7 +9,12 @@
     align-items: center;
 }
 
-.loginform__submit {
+.form__item {
+    display: flex;
+    flex-direction: column;
+}
+
+.form__submit {
     padding: 10px;
     border-radius: 10px;
     background-color: var(--third-color);
@@ -17,6 +22,6 @@
     transition-duration: 200ms;
 }
 
-.loginform__submit:hover {
+.form__submit:hover {
     background-color: var(--first-accent-color);
 }

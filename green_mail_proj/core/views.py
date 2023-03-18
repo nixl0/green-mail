@@ -1,9 +1,10 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 import smtplib
 import imaplib
 import email as em
 import base64
+import ssl
 from core.models import Email, Account
 from django.db import connection
 from dateutil import parser
@@ -19,6 +20,20 @@ def home(request):
         smtp_port = request.POST.get('smtp_port')
         imap_host = request.POST.get('imap_host')
         imap_port = request.POST.get('imap_port')
+
+        # check connections
+        imap_connection, imap_ex = check_imap_connection(email_address, password, imap_host, imap_port)
+        if not imap_connection:
+            return render(request, 'error.html', {
+                'message': 'Не получилось подключиться к серверу IMAP.',
+                'exception': imap_ex
+                })
+        smtp_connection, smtp_ex = check_smtp_connection(email_address, password, smtp_host, smtp_port)
+        if not smtp_connection:
+            return render(request, 'error.html', {
+                'message': 'Не получилось подключиться к серверу SMTP.',
+                'exception': smtp_ex
+                })
 
         # signing in
         messages_list = load_imap_messages(email_address, password, imap_host, imap_port)
@@ -37,6 +52,8 @@ def home(request):
             smtp_host=smtp_host,
             smtp_port=smtp_port
         )
+
+        account.save()
 
 
         # loading messages into our local db cache
@@ -64,6 +81,28 @@ def home(request):
 
 def authenticate(request):
     return render(request, 'authentication.html')
+
+
+def check_imap_connection(email_address, password, imap_host, imap_port):
+    try:
+        imap_server = imaplib.IMAP4_SSL(imap_host, imap_port)
+        imap_server.login(email_address, password)
+        imap_server.select('INBOX')
+        imap_server.close()
+        imap_server.logout()
+        return True, None
+    except Exception as e:
+        return False, e
+    
+
+def check_smtp_connection(email_address, password, smtp_host, smtp_port):
+    try:
+        smtp_server = smtplib.SMTP_SSL(smtp_host, smtp_port, context=ssl.create_default_context())
+        smtp_server.login(email_address, password)
+        smtp_server.quit()
+        return True, None
+    except Exception as e:
+        return False, e
 
 
 def load_imap_messages(email, password, imap_host, imap_port=993):
@@ -142,3 +181,38 @@ def show(request, num):
     return render(request, 'message.html', {
         'message': email
     })
+
+
+def compose(request):
+    return render(request, 'compose.html')
+
+
+def send(request):
+    recipient = request.POST.get('recipient')
+    subject = request.POST.get('subject')
+    body = request.POST.get('body')
+
+    account = Account.objects.get(id=1)
+    email_address = account.email
+    password = account.password
+    smtp_host = account.smtp_host
+    smtp_port = account.smtp_port
+
+    try:
+        with smtplib.SMTP_SSL(smtp_host, smtp_port, context=ssl.create_default_context()) as smtp_server:
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+
+            smtp_server.login(email_address, password)
+
+            message = MIMEMultipart()
+            message['From'] = email_address
+            message['To'] = recipient
+            message['Subject'] = subject
+            message.attach(MIMEText(body, 'html'))
+
+            smtp_server.send_message(message)
+
+        return redirect(home)
+    except Exception as e:
+        return render(request, 'error.html', {'message': 'Отправить сообщение не удалось', 'exception': e})
