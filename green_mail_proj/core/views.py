@@ -12,6 +12,7 @@ from django.db import connection
 from dateutil import parser
 from Crypto.Cipher import DES
 from Crypto.Util.Padding import pad, unpad
+import rsa
 
 
 def home(request):
@@ -294,9 +295,73 @@ def decrypt_des(request, message_id):
     return redirect('show', num=message_id)
 
 
+def generate_rsa_key_pair(request, message_id):
+    pub_key, priv_key = rsa.newkeys(512)
+    pub_key, priv_key = pub_key.save_pkcs1().decode('utf-8'), priv_key.save_pkcs1().decode('utf-8')
+    
+    return redirect('show', num=message_id, pub_key=pub_key, priv_key=priv_key)
+
+
 def encrypt_rsa(request, message_id):
-    pass
+    message = Email.objects.get(id=message_id)
+
+    from_ = message.sender_email
+    to_ = message.recipients_email
+    subject_ = message.subject
+    body_ = message.body
+
+    # get the user public key
+    user_key = request.POST.get('key')
+
+    if not user_key:
+        return render(request, 'error.html', {
+                'message': 'Не был предоставлен публичный (открытый) ключ',
+                'exception': ''
+                })
+    
+    pub_key = rsa.PublicKey.load_pkcs1(user_key.encode())
+
+    # encrypt message fields
+    from_encrypted = rsa.encrypt(from_.encode('utf-8'), pub_key)
+    to_encrypted = rsa.encrypt(to_.encode('utf-8'), pub_key)
+    subject_encrypted = rsa.encrypt(subject_.encode('utf-8'), pub_key)
+    body_encrypted = rsa.encrypt(body_.encode('utf-8'), pub_key)
+
+    # update message fields
+    message.sender_email = from_encrypted.decode('utf-8')
+    message.recipients_email = to_encrypted.decode('utf-8')
+    message.subject = subject_encrypted.decode('utf-8')
+    message.body = body_encrypted.decode('utf-8')
+    message.save()
+
+    return redirect('show', num=message_id)
 
 
 def decrypt_rsa(request, message_id):
-    pass
+    message = Email.objects.get(id=message_id)
+
+    # get the user's private key
+    user_priv_key = request.POST.get('key')
+
+    if not user_priv_key:
+        return render(request, 'error.html', {
+                'message': 'Не был предоставлен приватный (закрытый) ключ',
+                'exception': ''
+                })
+
+    priv_key = rsa.PrivateKey.load_pkcs1(user_priv_key.encode())
+
+    # decrypt message fields
+    from_decrypted = rsa.decrypt(message.sender_email.encode('utf-8'), priv_key)
+    to_decrypted = rsa.decrypt(message.recipients_email.encode('utf-8'), priv_key)
+    subject_decrypted = rsa.decrypt(message.subject.encode('utf-8'), priv_key)
+    body_decrypted = rsa.decrypt(message.body.encode('utf-8'), priv_key)
+
+    # update message fields
+    message.sender_email = from_decrypted.decode('utf-8')
+    message.recipients_email = to_decrypted.decode('utf-8')
+    message.subject = subject_decrypted.decode('utf-8')
+    message.body = body_decrypted.decode('utf-8')
+    message.save()
+
+    return redirect('show', num=message_id)

@@ -24,6 +24,12 @@ span {
     flex-direction: column;
 }
 
+.instruments__algorithm {
+    background-color: var(--fourth-color);
+    padding: 20px;
+    border-radius: 20px;
+}
+
 .instruments__form {
     display: flex;
     gap: 10px;
