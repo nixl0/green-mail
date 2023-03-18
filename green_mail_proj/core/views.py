@@ -5,9 +5,13 @@ import imaplib
 import email as em
 import base64
 import ssl
+
+from django.urls import reverse
 from core.models import Email, Account
 from django.db import connection
 from dateutil import parser
+from Crypto.Cipher import DES
+from Crypto.Util.Padding import pad, unpad
 
 
 def home(request):
@@ -216,3 +220,83 @@ def send(request):
         return redirect(home)
     except Exception as e:
         return render(request, 'error.html', {'message': 'Отправить сообщение не удалось', 'exception': e})
+
+
+def encrypt_des(request, message_id):
+    message = Email.objects.get(id=message_id)
+
+    from_ = message.sender_email
+    to_ = message.recipients_email
+    subject_ = message.subject
+    body_ = message.body
+
+    # create DES cipher object
+    user_key = request.POST.get('key')
+    if not user_key:
+        key = b'secretkey'
+    else:
+        key = user_key.encode()
+    key = bytearray(key[:8].ljust(8, b'\0'))
+    cipher = DES.new(key, DES.MODE_ECB)
+
+    # encrypt message fields
+    from_encrypted = base64.b64encode(cipher.encrypt(pad(from_.encode('utf-8'), DES.block_size)))
+    to_encrypted = base64.b64encode(cipher.encrypt(pad(to_.encode('utf-8'), DES.block_size)))
+    subject_encrypted = base64.b64encode(cipher.encrypt(pad(subject_.encode('utf-8'), DES.block_size)))
+    body_encrypted = base64.b64encode(cipher.encrypt(pad(body_.encode('utf-8'), DES.block_size)))
+
+    # update message fields
+    message.sender_email = from_encrypted.decode('utf-8')
+    message.recipients_email = to_encrypted.decode('utf-8')
+    message.subject = subject_encrypted.decode('utf-8')
+    message.body = body_encrypted.decode('utf-8')
+    message.save()
+
+    return redirect('show', num=message_id)
+
+
+def decrypt_des(request, message_id):
+    message = Email.objects.get(id=message_id)
+
+    from_ = message.sender_email
+    to_ = message.recipients_email
+    subject_ = message.subject
+    body_ = message.body
+
+    try:
+        # create DES cipher object
+        user_key = request.POST.get('key')
+        if not user_key:
+            key = b'secretkey'
+        else:
+            key = user_key.encode()
+        key = bytearray(key[:8].ljust(8, b'\0'))
+        cipher = DES.new(key, DES.MODE_ECB)
+
+        # decrypt message fields
+        from_decrypted = unpad(cipher.decrypt(base64.b64decode(from_.encode('utf-8'))), DES.block_size).decode('utf-8')
+        to_decrypted = unpad(cipher.decrypt(base64.b64decode(to_.encode('utf-8'))), DES.block_size).decode('utf-8')
+        subject_decrypted = unpad(cipher.decrypt(base64.b64decode(subject_.encode('utf-8'))), DES.block_size).decode('utf-8')
+        body_decrypted = unpad(cipher.decrypt(base64.b64decode(body_.encode('utf-8'))), DES.block_size).decode('utf-8')
+    except Exception as e:
+        return render(request, 'error.html', {
+                'message': 'Не получилось расшифровать.',
+                'exception': e
+                })
+
+    # update message fields
+    message.sender_email = from_decrypted
+    message.recipients_email = to_decrypted
+    message.subject = subject_decrypted
+    message.body = body_decrypted
+    message.save()
+
+    return redirect('show', num=message_id)
+
+
+def encrypt_rsa(request, message_id):
+    pass
+
+
+def decrypt_rsa(request, message_id):
+    pass

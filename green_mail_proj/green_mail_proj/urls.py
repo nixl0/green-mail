@@ -22,7 +22,11 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', views.authenticate),
-    path('email/<int:num>', views.show),
+    path('email/<int:message_id>/des/encrypt/', views.encrypt_des),
+    path('email/<int:message_id>/des/decrypt/', views.decrypt_des),
+    path('email/<int:message_id>/rsa/encrypt/', views.encrypt_rsa),
+    path('email/<int:message_id>/rsa/decrypt/', views.decrypt_rsa),
+    path('email/<int:num>', views.show, name='show'),
     path('compose/', views.compose),
     path('send/', views.send),
     path('', views.home),

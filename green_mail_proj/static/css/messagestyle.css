@@ -1,0 +1,74 @@
+@import url('darkcolors.css');
+
+span {
+    color: #FFF;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.wrapper {
+    width: min-content;
+    min-width: 600px;
+    margin: 0 auto;
+}
+
+.instruments {
+    background-color: var(--third-color);
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 20px;
+    display: flex;
+    gap: 6px;
+    flex-direction: column;
+}
+
+.instruments__form {
+    display: flex;
+    gap: 10px;
+}
+
+.instruments__link {
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.instruments__input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message {
+    background-color: var(--third-color);
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.message__info {
+    background-color: var(--fourth-color);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: fit-content;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+.info__subject {
+    font-size: 1.4rem;
+}
+
+.info__body {
+    /* width: 600px; */
+    margin: 0 auto;
+    word-wrap: break-word;
+    word-break: break-all;
+}
